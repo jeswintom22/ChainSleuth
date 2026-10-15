@@ -1,0 +1,17 @@
+# Direct dependencies, pinned to tested versions (resolved with --uploaded-prior-to 2026-10-08).
+# Full transitive lock: requirements.lock.txt
+FalkorDB==1.7.1
+fastapi==0.142.4
+uvicorn==0.54.0
+pydantic==2.13.5
+python-dotenv==1.2.4
+httpx==0.28.1
+pytest==9.1.1
+pytest-asyncio==1.4.0
+# GraphRAG SDK runtime deps (graphrag-sdk itself is installed with --no-deps, see requirements-graphrag.txt)
+litellm==1.104.1
+openai==2.54.0
+numpy==2.2.6
+scipy==1.15.3
+tiktoken==0.14.0
+markdown-it-py==4.2.0  # graphrag-sdk[markdown] extra, required to ingest the .md policy documents

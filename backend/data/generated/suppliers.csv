@@ -1,0 +1,81 @@
+supplier_id,name,status,created_at
+SUP-001,Blue Industrial 001,active,2023-11-16
+SUP-002,Cedar Supply 002,active,2025-09-21
+SUP-003,Delta Logistics 003,active,2025-03-18
+SUP-004,Ember Metals 004,active,2025-08-17
+SUP-005,Falcon Plastics 005,active,2025-07-26
+SUP-006,Granite Electronics 006,active,2025-01-26
+SUP-007,Harbor Tools 007,active,2024-01-26
+SUP-008,Iris Packaging 008,active,2025-05-24
+SUP-009,Juniper Chemicals 009,active,2024-11-08
+SUP-010,Northwind Components,active,2023-12-21
+SUP-011,Northwind Comp. Ltd,active,2025-02-06
+SUP-012,NW Industrial Supply,active,2023-11-19
+SUP-013,Nova Logistics 013,active,2023-12-08
+SUP-014,Onyx Metals 014,active,2025-08-25
+SUP-015,Pioneer Plastics 015,active,2024-01-26
+SUP-016,Quarry Electronics 016,active,2024-05-09
+SUP-017,Ridge Tools 017,active,2025-05-23
+SUP-018,Summit Packaging 018,active,2024-10-14
+SUP-019,Tidal Chemicals 019,active,2024-01-21
+SUP-020,Granite Metals,active,2024-04-15
+SUP-021,Granite Metalworks,active,2025-03-27
+SUP-022,Cedar Supply 022,active,2023-12-06
+SUP-023,Delta Logistics 023,active,2023-09-12
+SUP-024,Ember Metals 024,active,2025-03-17
+SUP-025,Falcon Plastics 025,active,2023-08-05
+SUP-026,Granite Electronics 026,active,2024-09-22
+SUP-027,Harbor Tools 027,active,2025-08-31
+SUP-028,Iris Packaging 028,active,2024-04-05
+SUP-029,Juniper Chemicals 029,active,2025-04-03
+SUP-030,Atlas Fasteners,active,2024-06-13
+SUP-031,Cedar Plastics,active,2024-01-18
+SUP-032,Harbor Tools,active,2025-06-13
+SUP-033,Iris Packaging,active,2025-06-17
+SUP-034,Onyx Metals 034,active,2023-10-06
+SUP-035,Pioneer Plastics 035,active,2024-05-04
+SUP-036,Quarry Electronics 036,active,2023-10-04
+SUP-037,Ridge Tools 037,active,2024-08-25
+SUP-038,Summit Packaging 038,active,2024-09-24
+SUP-039,Tidal Chemicals 039,active,2025-03-27
+SUP-040,Apex Components 040,active,2024-06-03
+SUP-041,Blue Industrial 041,active,2025-08-05
+SUP-042,Cedar Supply 042,active,2025-07-17
+SUP-043,Delta Logistics 043,active,2024-02-03
+SUP-044,Ember Metals 044,active,2023-08-18
+SUP-045,Falcon Plastics 045,active,2024-08-31
+SUP-046,Granite Electronics 046,active,2025-09-02
+SUP-047,Harbor Tools 047,active,2024-10-12
+SUP-048,Iris Packaging 048,active,2024-07-15
+SUP-049,Juniper Chemicals 049,active,2025-02-22
+SUP-050,Kestrel Components 050,active,2025-10-26
+SUP-051,Lumen Industrial 051,active,2023-10-30
+SUP-052,Maple Supply 052,active,2023-12-09
+SUP-053,Nova Logistics 053,active,2023-09-30
+SUP-054,Onyx Metals 054,active,2023-09-11
+SUP-055,Pioneer Plastics 055,active,2024-11-23
+SUP-056,Quarry Electronics 056,active,2025-01-10
+SUP-057,Ridge Tools 057,active,2025-05-29
+SUP-058,Summit Packaging 058,active,2025-11-03
+SUP-059,Tidal Chemicals 059,active,2024-06-12
+SUP-060,Apex Components 060,active,2024-06-05
+SUP-061,Blue Industrial 061,active,2024-02-05
+SUP-062,Cedar Supply 062,active,2024-01-22
+SUP-063,Delta Logistics 063,active,2024-02-22
+SUP-064,Ember Metals 064,active,2025-06-03
+SUP-065,Falcon Plastics 065,active,2023-09-18
+SUP-066,Granite Electronics 066,active,2024-05-03
+SUP-067,Harbor Tools 067,active,2025-11-06
+SUP-068,Iris Packaging 068,active,2024-12-10
+SUP-069,Juniper Chemicals 069,active,2025-10-18
+SUP-070,Kestrel Components 070,active,2024-10-31
+SUP-071,Lumen Industrial 071,active,2025-03-06
+SUP-072,Maple Supply 072,active,2025-03-05
+SUP-073,Nova Logistics 073,active,2025-08-18
+SUP-074,Onyx Metals 074,active,2023-10-19
+SUP-075,Pioneer Plastics 075,active,2023-07-25
+SUP-076,Quarry Electronics 076,active,2023-09-20
+SUP-077,Ridge Tools 077,active,2023-09-14
+SUP-078,Summit Packaging 078,active,2025-06-28
+SUP-079,Tidal Chemicals 079,active,2024-07-08
+SUP-080,Apex Components 080,active,2025-05-21

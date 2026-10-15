@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+.pytest_cache/
+node_modules/
+.next/
+frontend/out/
+*.log
+.tmp_gr/

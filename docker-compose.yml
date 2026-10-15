@@ -1,0 +1,20 @@
+services:
+  falkordb:
+    # Pinned to the 4.x C engine: graphrag-sdk 1.3.0 creates full-text indexes with the
+    # db.idx.fulltext.createNodeIndex(label, prop) signature, which the 6.0 Rust engine rejects
+    # (verified; see README "Version compatibility").
+    image: falkordb/falkordb:v4.22.0
+    container_name: chainsleuth-falkordb
+    ports:
+      - "6379:6379"
+      - "3000:3000"
+    volumes:
+      - falkordb_data_v4:/var/lib/falkordb/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  falkordb_data_v4:

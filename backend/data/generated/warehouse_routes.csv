@@ -1,0 +1,13 @@
+from_warehouse,to_warehouse
+WH-01,WH-02
+WH-02,WH-03
+WH-03,WH-04
+WH-04,WH-05
+WH-01,WH-06
+WH-06,WH-07
+WH-07,WH-08
+WH-05,WH-10
+WH-08,WH-10
+WH-06,WH-09
+WH-09,WH-10
+WH-02,WH-06

@@ -1,0 +1,77 @@
+{
+  "environment": {
+    "python": "3.10.11",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "falkordb_image": "falkordb/falkordb:v4.22.0"
+  },
+  "per_rule": {
+    "R1_SHARED_ACCOUNT": {
+      "planted": 2,
+      "detected": 2,
+      "true_positives": 2,
+      "false_positives": 0,
+      "missed": [],
+      "recall": 1.0,
+      "precision": 1.0,
+      "legitimate_controls": 1,
+      "legitimate_flagged": [],
+      "median_query_ms": 3.1
+    },
+    "R2_DUPLICATE_INVOICE": {
+      "planted": 2,
+      "detected": 2,
+      "true_positives": 2,
+      "false_positives": 0,
+      "missed": [],
+      "recall": 1.0,
+      "precision": 1.0,
+      "legitimate_controls": 1,
+      "legitimate_flagged": [],
+      "median_query_ms": 2.1
+    },
+    "R3_RECONCILIATION": {
+      "planted": 6,
+      "detected": 6,
+      "true_positives": 6,
+      "false_positives": 0,
+      "missed": [],
+      "recall": 1.0,
+      "precision": 1.0,
+      "legitimate_controls": 2,
+      "legitimate_flagged": [],
+      "median_query_ms": 51.8
+    },
+    "R4_ROUTE_ANOMALY": {
+      "planted": 2,
+      "detected": 2,
+      "true_positives": 2,
+      "false_positives": 0,
+      "missed": [],
+      "recall": 1.0,
+      "precision": 1.0,
+      "legitimate_controls": 0,
+      "legitimate_flagged": [],
+      "median_query_ms": 5.2
+    }
+  },
+  "overall": {
+    "recall": 1.0,
+    "precision": 1.0
+  },
+  "repeatability": {
+    "first_run_new_findings": 12,
+    "second_run_new_findings": 0,
+    "finding_nodes_after_run_1": 12,
+    "finding_nodes_after_run_2": 12
+  },
+  "explanations": {
+    "investigations": 8,
+    "grounded": 8,
+    "findings_with_complete_evidence": "11/11"
+  },
+  "latency_ms": {
+    "detection_run_total": 59.0,
+    "investigation_median": 987.5,
+    "investigation_max": 15438.8
+  }
+}
