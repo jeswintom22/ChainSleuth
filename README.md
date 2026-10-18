@@ -124,7 +124,7 @@ Run the tests from `backend/` with `pytest`. They need the FalkorDB container fr
    - **R3 quantity mismatch.** `INV-1043` bills 100 units of `PRD-007` on `PO-5043`. 100 were ordered and 60 delivered (`SHP-7043`), an excess of 40 (25 points).
    - **R3 unresolved PO link.** `INV-1044` has no purchase order (10 points).
    - The score is 100 (critical review priority). Each finding is shown with its evidence paths, the named query that reproduces it, and the GraphRAG policy passages that support it (PP-100 *Quantity Tolerance*, *Duplicate Invoice Control*, and so on).
-4. Open the **Graph** tab to see the findings, the records they involve, and the real FalkorDB relationships between those records.
+4. Open the **Graph** tab. The view centers and zooms to the highlighted operational path from `INV-1043` through its suppliers and shared account `ACC-900`, then to `PO-5043` and `SHP-7043`. Scroll to zoom, drag to pan, click a node to inspect its relationships, or use **Fit path**, **Focus path**, and fullscreen mode. Finding nodes are hidden by default to keep the procurement path readable and can be restored with **Show findings**.
 5. Record reviewer decisions: confirm the quantity mismatch and dismiss the duplicate. The score is recomputed (dismissed findings stop counting).
 6. Open **Ask the agent** and try *"Which invoice duplicates INV-1043 and does it have a purchase order?"*. Answers are grounded and stored as `AgentTurn` nodes.
 7. Restart the API or open a new browser session, then reopen the investigation. Reviewer state, explanation and conversation are all reloaded from FalkorDB.

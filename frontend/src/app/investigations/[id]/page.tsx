@@ -126,7 +126,7 @@ export default function InvestigationPage() {
         </Grid>
       )}
 
-      {tab === 1 && <Paper sx={{ p: 2 }}>{graph ? <GraphView data={graph} /> : <CircularProgress />}</Paper>}
+      {tab === 1 && <Paper sx={{ p: { xs: 1.5, md: 2 } }}>{graph ? <GraphView data={graph} targetId={inv.target_id} /> : <CircularProgress />}</Paper>}
 
       {tab === 2 && <Paper sx={{ p: 2 }}><ChatPanel investigationId={inv.investigation_id} /></Paper>}
 
