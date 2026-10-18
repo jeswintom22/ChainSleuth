@@ -2,6 +2,8 @@
 
 **An explainable procurement-anomaly investigation agent built on FalkorDB.**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Graph Hacks 2026 · Primary track: **Agents That Act on Connected Data**
 
 An auditor picks an invoice, supplier, purchase order or shipment, or asks a question about one. ChainSleuth then:
@@ -18,6 +20,7 @@ An auditor picks an invoice, supplier, purchase order or shipment, or asks a que
 ---
 
 ## Contents
+- [Screenshots](#screenshots)
 - [Architecture](#architecture)
 - [Pinned versions](#pinned-versions)
 - [Quick start (local)](#quick-start-local)
@@ -31,6 +34,25 @@ An auditor picks an invoice, supplier, purchase order or shipment, or asks a que
 - [Version compatibility findings](#version-compatibility-findings)
 - [Limitations](#limitations)
 - [Repository layout](#repository-layout)
+- [License](#license)
+
+## Screenshots
+
+### Investigation dashboard
+
+![ChainSleuth dashboard showing FalkorDB, dataset, LLM and GraphRAG status](docs/screenshots/dashboard.png)
+
+### Grounded investigation
+
+![Investigation for INV-1043 with deterministic score, grounded explanation and evidence](docs/screenshots/investigation.png)
+
+### Highlighted graph path
+
+![Focused graph path connecting INV-1043, suppliers, ACC-900, PO-5043 and SHP-7043](docs/screenshots/graph-view.png)
+
+### Evidence-grounded agent follow-up
+
+![Agent follow-up interface backed by the persisted investigation evidence](docs/screenshots/agent-chat.png)
 
 ## Architecture
 
@@ -91,9 +113,11 @@ docker compose up -d
 cd backend
 python -m venv .venv
 # Windows: .venv\Scripts\activate     macOS/Linux: source .venv/bin/activate
-pip install -r requirements.lock.txt
-pip install --no-deps -r requirements-graphrag.txt
-cp .env.example .env            # optionally set OPENAI_API_KEY=...
+python -m pip install -r requirements.lock.txt
+python -m pip install --no-deps -r requirements-graphrag.txt
+# macOS/Linux: cp .env.example .env
+# PowerShell: Copy-Item .env.example .env
+# Optionally set OPENAI_API_KEY in .env
 
 # 3. Synthetic data -> FalkorDB (explicit CSV ingestion, then integrity validation)
 python -m data.generate_synthetic
@@ -106,13 +130,28 @@ python -m app.graphrag.ingest_documents --reset
 # 5. API
 uvicorn app.main:app --port 8000
 
-# 6. UI (new terminal)
+# 6. UI (new terminal, from the repository root)
 cd frontend
 npm ci
 npm run dev                     # http://localhost:3001
 ```
 
-Run the tests from `backend/` with `pytest`. They need the FalkorDB container from step 1. The tests use their own graphs (`chainsleuth_test` and `chainsleuth_docs_gate_test`), so they never touch the demo data. Tests marked `llm` skip automatically when no key is set.
+### Verify the installation
+
+With FalkorDB running, execute:
+
+```bash
+# Backend, from backend/
+python -m pytest -q
+
+# Frontend, from frontend/
+npm run typecheck
+npm run build
+```
+
+The expected backend result is `73 passed`; live LLM tests skip automatically when no key is configured. The frontend build must run while `npm run dev` is stopped because both commands write to `.next`. If a previous process was interrupted and Next.js reports a missing generated chunk, stop the dev server, remove `frontend/.next`, and restart it.
+
+The tests use isolated graphs (`chainsleuth_test` and `chainsleuth_docs_gate_test`) and do not modify the demo graph. `graphrag-sdk` intentionally reports `gliner` and `hnswlib` as absent under `pip check`; ChainSleuth does not use those optional strategies, and the live GraphRAG gate test verifies the supported installation path.
 
 ## Demo walkthrough
 
@@ -342,7 +381,9 @@ backend/
   data/policies/*.md             synthetic policy documents
   tests/                         73 tests
 frontend/                        Next.js 15 + MUI 6 investigation UI
+docs/screenshots/                README product screenshots
 AI_USAGE.md                      disclosure of AI coding assistance
+LICENSE                          MIT license
 ```
 
 ## Hackathon submission fields
@@ -352,3 +393,7 @@ AI_USAGE.md                      disclosure of AI coding assistance
 - **FalkorDB usage:** the primary database for every operational fact, every detection traversal (shared-account networks, invoice/order/shipment line reconciliation, route validation), the investigation scope traversal, and persistent investigation memory (findings, reviews, `FOLLOWED_BY` history, agent turns). It also hosts the GraphRAG SDK document graph.
 - **Data:** fully synthetic (generator included)
 - **AI assistance:** disclosed in [AI_USAGE.md](AI_USAGE.md)
+
+## License
+
+ChainSleuth is open source under the [MIT License](LICENSE).
