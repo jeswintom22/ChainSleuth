@@ -38,15 +38,17 @@ Only reply "DONE" (with no tool calls) after open_investigation has returned."""
 
 
 class Trace:
-    def __init__(self, current_investigation: str | None = None) -> None:
+    def __init__(self, current_investigation: str | None = None, created_by: str = "auditor") -> None:
         self.steps: list[dict] = []
         self.current_investigation = current_investigation
+        self.created_by = created_by
 
     def call(self, name: str, args: dict, allow_writes: bool = True, actor: str = "orchestrator") -> Any:
         t = time.perf_counter()
         try:
             result = call_tool(name, args, allow_writes=allow_writes,
-                               context={"current_investigation": self.current_investigation})
+                               context={"current_investigation": self.current_investigation,
+                                        "created_by": self.created_by})
             if name == "open_investigation":
                 self.current_investigation = result["investigation_id"]
             ok, err = True, None
@@ -104,7 +106,7 @@ def _attach_policy(inv: dict, trace: Trace) -> tuple[list[dict], str, str]:
 def investigate(question: str, entity_id: str | None = None, created_by: str = "auditor",
                 use_llm: bool | None = None) -> dict:
     use_llm = llm_available() if use_llm is None else use_llm
-    trace = Trace()
+    trace = Trace(created_by=created_by)
     entity_id = (entity_id or service.extract_entity_id(question) or "").upper() or None
     agent_outputs: list[dict] = []
 

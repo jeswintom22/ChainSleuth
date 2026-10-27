@@ -1,19 +1,26 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { api, clearToken, getToken, setToken } from "@/lib/api";
 
-const KEY = "chainsleuth.reviewer";
-const Ctx = createContext<[string, (v: string) => void]>(["", () => {}]);
+export type SessionUser = { name: string; role: string };
+type Session = { user: SessionUser | null; error: string | null; signIn: (token: string) => Promise<void>; signOut: () => void };
+const Ctx = createContext<Session>({ user: null, error: null, signIn: async () => {}, signOut: () => {} });
 
 export function ReviewerProvider({ children }: { children: React.ReactNode }) {
-  const [name, setName] = useState("");
-  useEffect(() => setName(localStorage.getItem(KEY) || "auditor.demo"), []);
-  const update = (v: string) => {
-    setName(v);
-    localStorage.setItem(KEY, v);
-  };
-  return <Ctx.Provider value={[name, update]}>{children}</Ctx.Provider>;
+  const [user, setUser] = useState<SessionUser | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const refresh = useCallback(async () => {
+    if (!getToken()) { setUser(null); return; }
+    try { setUser(await api.me()); setError(null); }
+    catch (e) { clearToken(); setUser(null); setError(String(e)); }
+  }, []);
+  useEffect(() => { refresh(); }, [refresh]);
+  const signIn = async (token: string) => { setToken(token.trim()); await refresh(); };
+  const signOut = () => { clearToken(); setUser(null); };
+  return <Ctx.Provider value={{ user, error, signIn, signOut }}>{children}</Ctx.Provider>;
 }
 
+/** The signed-in reviewer. Identity is derived server-side from the API token. */
 export const useReviewer = () => useContext(Ctx);
 
 export const SEVERITY_COLOR: Record<string, "default" | "info" | "warning" | "error" | "success"> = {

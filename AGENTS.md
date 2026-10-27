@@ -7,7 +7,7 @@
 - Resolve new dependencies with a publication cutoff of at least 7 days (`pip --uploaded-prior-to`, `npm install --before=`). Check `npm view <pkg> time` yourself, because `npm view --before` does not filter.
 
 ## Commands (run from `backend/` unless noted)
-- Tests: `.venv/Scripts/python -m pytest -q` (73 tests; uses graphs `chainsleuth_test` and `chainsleuth_docs_gate_test`; tests marked `llm` skip when there is no key).
+- Tests: `.venv/Scripts/python -m pytest -q` (85 tests; uses graphs `chainsleuth_test` and `chainsleuth_docs_gate_test`; tests marked `llm` skip when there is no key).
 - Generate data: `python -m data.generate_synthetic`. Load it: `python -m app.graph.ingest --reset`.
 - GraphRAG documents: `python -m app.graphrag.ingest_documents --reset` (deletes the `chainsleuth_docs` and `chainsleuth_docs__ontology` graphs first).
 - Evaluation: `CHAINSLEUTH_GRAPH=chainsleuth_eval python -m app.evaluate` (refuses to run against the demo graph).

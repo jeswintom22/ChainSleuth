@@ -2,6 +2,9 @@ import os
 
 # Tests run against an isolated graph on the same pinned FalkorDB server so they never touch demo data.
 os.environ["CHAINSLEUTH_GRAPH"] = "chainsleuth_test"
+TEST_TOKENS = {"auditor.a": "test-reviewer-token-aaaa", "admin.t": "test-admin-token-bbbbbb"}
+os.environ["CHAINSLEUTH_API_USERS"] = (f"auditor.a:reviewer:{TEST_TOKENS['auditor.a']},"
+                                       f"admin.t:admin:{TEST_TOKENS['admin.t']}")
 
 import csv  # noqa: E402
 

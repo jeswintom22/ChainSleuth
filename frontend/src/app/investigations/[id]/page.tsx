@@ -23,7 +23,7 @@ const POLICY_LABEL: Record<string, [string, "success" | "warning" | "error" | "d
 
 export default function InvestigationPage() {
   const { id } = useParams<{ id: string }>();
-  const [reviewer] = useReviewer();
+  const { user } = useReviewer();
   const [inv, setInv] = useState<Investigation | null>(null);
   const [graph, setGraph] = useState<GraphData | null>(null);
   const [compare, setCompare] = useState<any>(null);
@@ -62,8 +62,8 @@ export default function InvestigationPage() {
           </Stack>
           <Stack spacing={1}>
             <Typography variant="caption">Investigation status</Typography>
-            <Select size="small" value={inv.status} disabled={!reviewer}
-              onChange={async (e) => setInv(await api.setStatus(inv.investigation_id, e.target.value, reviewer))}>
+            <Select size="small" value={inv.status} disabled={!user}
+              onChange={async (e) => setInv(await api.setStatus(inv.investigation_id, e.target.value))}>
               {["open", "in_review", "closed"].map((s) => <MenuItem key={s} value={s}>{s.replace("_", " ")}</MenuItem>)}
             </Select>
             <Chip size="small" color={STATUS_COLOR[inv.status]} label={inv.status} />

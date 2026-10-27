@@ -26,7 +26,7 @@ function HealthChip({ label, ok, detail }: { label: string; ok: boolean; detail?
 
 export default function Dashboard() {
   const router = useRouter();
-  const [reviewer] = useReviewer();
+  const { user } = useReviewer();
   const [health, setHealth] = useState<Record<string, any> | null>(null);
   const [stats, setStats] = useState<Record<string, any> | null>(null);
   const [invs, setInvs] = useState<InvestigationSummary[]>([]);
@@ -58,7 +58,7 @@ export default function Dashboard() {
 
   const investigate = () => run("investigate", async () => {
     const inv = await api.createInvestigation({
-      question, entity_id: entity || undefined, created_by: reviewer || "auditor",
+      question, entity_id: entity || undefined,
       use_llm: health?.llm_available ? useLlm : false,
     });
     router.push(`/investigations/${inv.investigation_id}`);
@@ -88,11 +88,11 @@ export default function Dashboard() {
             </>
           ) : <CircularProgress size={18} />}
           <Box sx={{ flex: 1 }} />
-          <Button size="small" startIcon={<RefreshIcon />} disabled={!!busy}
+          <Button size="small" startIcon={<RefreshIcon />} disabled={!!busy || user?.role !== "admin"}
             onClick={() => run("load", async () => { const r = await api.loadDataset(false); setNotice(`Dataset loaded; integrity ${r.integrity.ok ? "OK" : "FAILED: " + r.integrity.problems.join("; ")}`); })}>
             {busy === "load" ? "Loading..." : "Load synthetic dataset"}
           </Button>
-          <Button size="small" variant="outlined" startIcon={<PlayArrowIcon />} disabled={!!busy || !health?.dataset_loaded}
+          <Button size="small" variant="outlined" startIcon={<PlayArrowIcon />} disabled={!!busy || !user || !health?.dataset_loaded}
             onClick={() => run("detect", async () => { const r = await api.runDetection(); setNotice(`Detection run ${r.run_id}: ${r.signals} signals, ${r.new_findings} new findings`); })}>
             {busy === "detect" ? "Running..." : "Run detection"}
           </Button>

@@ -10,11 +10,14 @@ from fastapi.testclient import TestClient
 from app.config import EXPECTED_MODULE_VERSION, settings
 from app.graph import client as graph_client
 from app.main import app
+from tests.conftest import TEST_TOKENS
+
+AUTH = {"Authorization": f"Bearer {TEST_TOKENS['auditor.a']}"}
 
 
 @pytest.fixture(scope="module")
 def api(clean_investigation_layer):
-    return TestClient(app)
+    return TestClient(app, headers=AUTH)
 
 
 def test_acceptance_flow(api, monkeypatch):
@@ -26,7 +29,7 @@ def test_acceptance_flow(api, monkeypatch):
 
     # 3-5. investigation with detection, deterministic score and evidence paths
     r = api.post("/api/investigations", json={"question": "Why should INV-1043 be investigated?",
-                                              "entity_id": "INV-1043", "created_by": "auditor.a"})
+                                              "entity_id": "INV-1043"})
     assert r.status_code == 200, r.text
     inv = r.json()
     by_rule = {f["rule_id"]: f for f in inv["findings"]}
@@ -35,7 +38,7 @@ def test_acceptance_flow(api, monkeypatch):
     mismatch = next(f for f in inv["findings"] if f["category"] == "quantity_mismatch")
     assert (mismatch["values"]["billed_quantity"], mismatch["values"]["delivered_quantity"]) == (100, 60)
     assert all(f["evidence_paths"] and f["rule_version"] for f in inv["findings"])
-    assert inv["score"] == 100 and inv["status"] == "open"
+    assert inv["score"] == 100 and inv["status"] == "open" and inv["created_by"] == "auditor.a"
 
     # 6. explanation tied to records, verified by the grounding validator
     assert inv["grounding"]["supported"] and inv["grounding"]["ids_checked"] > 0
@@ -49,16 +52,16 @@ def test_acceptance_flow(api, monkeypatch):
 
     # reviewer actions
     fid = mismatch["finding_id"]
-    assert api.post(f"/api/findings/{fid}/review", json={"decision": "confirmed", "reviewer": "auditor.a",
+    assert api.post(f"/api/findings/{fid}/review", json={"decision": "confirmed",
                                                          "note": "Receipt shortfall confirmed with warehouse",
                                                          "investigation_id": inv["investigation_id"]}).status_code == 200
     dup = by_rule["R2_DUPLICATE_INVOICE"]["finding_id"]
-    api.post(f"/api/findings/{dup}/review", json={"decision": "dismissed", "reviewer": "auditor.a", "note": "credited"})
-    api.patch(f"/api/investigations/{inv['investigation_id']}", json={"status": "in_review", "reviewer": "auditor.a"})
+    api.post(f"/api/findings/{dup}/review", json={"decision": "dismissed", "note": "credited"})
+    api.patch(f"/api/investigations/{inv['investigation_id']}", json={"status": "in_review"})
 
     # 8. new session: drop cached connections, re-run detection, reopen from FalkorDB
     graph_client.get_db.cache_clear()
-    fresh = TestClient(app)
+    fresh = TestClient(app, headers=AUTH)
     fresh.post("/api/detect/run")
     again = fresh.get(f"/api/investigations/{inv['investigation_id']}").json()
     status = {f["finding_id"]: f["status"] for f in again["findings"]}
@@ -84,8 +87,8 @@ def test_clean_entity_produces_no_findings(api, monkeypatch):
 def test_api_rejects_bad_input(api):
     assert api.post("/api/investigations", json={"question": "x", "entity_id": "DROP GRAPH"}).status_code == 422
     assert api.post("/api/investigations", json={"question": "about INV-9999"}).status_code == 422
-    assert api.post("/api/findings/F-x/review", json={"decision": "confirmed", "reviewer": "a"}).status_code == 404
-    assert api.post("/api/findings/F-x/review", json={"decision": "fraud", "reviewer": "a"}).status_code == 422
+    assert api.post("/api/findings/F-x/review", json={"decision": "confirmed"}).status_code == 404
+    assert api.post("/api/findings/F-x/review", json={"decision": "fraud"}).status_code == 422
 
 
 @pytest.mark.llm

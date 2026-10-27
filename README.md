@@ -118,6 +118,7 @@ python -m pip install --no-deps -r requirements-graphrag.txt
 # macOS/Linux: cp .env.example .env
 # PowerShell: Copy-Item .env.example .env
 # Optionally set OPENAI_API_KEY in .env
+# Set CHAINSLEUTH_API_USERS in .env (e.g. alice:admin:<token>,bob:reviewer:<token>); see "API authentication"
 
 # 3. Synthetic data -> FalkorDB (explicit CSV ingestion, then integrity validation)
 python -m data.generate_synthetic
@@ -136,6 +137,10 @@ npm ci
 npm run dev                     # http://localhost:3001
 ```
 
+### API authentication
+
+Every state-changing route (loading the dataset, running detection, opening investigations, recording reviews, changing investigation status and asking the agent) requires an `Authorization: Bearer <token>` header. Tokens are configured in `CHAINSLEUTH_API_USERS` as `name:role:token` entries. `reviewer` users can do everything except `POST /api/admin/load-dataset`, which needs `admin`. Reviewer and creator names in the audit trail come from the token's user, not from the request body. In the UI, paste your token into the **API token** field in the top bar. Read-only routes stay unauthenticated.
+
 ### Verify the installation
 
 With FalkorDB running, execute:
@@ -149,7 +154,7 @@ npm run typecheck
 npm run build
 ```
 
-The expected backend result is `73 passed`; live LLM tests skip automatically when no key is configured. The frontend build must run while `npm run dev` is stopped because both commands write to `.next`. If a previous process was interrupted and Next.js reports a missing generated chunk, stop the dev server, remove `frontend/.next`, and restart it.
+The expected backend result is `81 passed, 4 skipped`; live LLM tests skip automatically when no key is configured. The frontend build must run while `npm run dev` is stopped because both commands write to `.next`. If a previous process was interrupted and Next.js reports a missing generated chunk, stop the dev server, remove `frontend/.next`, and restart it.
 
 The tests use isolated graphs (`chainsleuth_test` and `chainsleuth_docs_gate_test`) and do not modify the demo graph. `graphrag-sdk` intentionally reports `gliner` and `hnswlib` as absent under `pip check`; ChainSleuth does not use those optional strategies, and the live GraphRAG gate test verifies the supported installation path.
 
@@ -317,7 +322,7 @@ Five synthetic documents live in `backend/data/policies/`: a procurement policy,
 
 ## Tests and measured results
 
-`pytest` in `backend/` runs **73 tests against `falkordb/falkordb:v4.22.0`, `FalkorDB` 1.7.1 and `graphrag-sdk` 1.3.0**, including the live GraphRAG gate and a live-LLM acceptance run. All 73 pass.
+`pytest` in `backend/` runs **85 tests against `falkordb/falkordb:v4.22.0`, `FalkorDB` 1.7.1 and `graphrag-sdk` 1.3.0**, including the live GraphRAG gate and a live-LLM acceptance run. Without an OpenAI key, 81 pass and the 4 `llm` tests skip.
 
 | Area | Tests |
 |---|---|
@@ -349,7 +354,7 @@ These numbers come from a small synthetic dataset whose anomalies were planted b
 
 Testing against the exact pinned versions turned up three issues, all of which are now covered by tests:
 
-1. **`graphrag-sdk` 1.3.0 is incompatible with FalkorDB 6.0.x.** The SDK creates full-text indexes with `CALL db.idx.fulltext.createNodeIndex('Chunk', 'text')`. The 6.0 Rust engine rejects this with *"Received 2 arguments … expected at most 1"*, and the SDK's circuit breaker then opens. SDK 1.4.0 contains the same call. ChainSleuth was developed on 6.0.2 at first, and the whole suite was then re-run on the 4.x C engine. **FalkorDB is pinned to v4.22.0**, where all 73 tests pass.
+1. **`graphrag-sdk` 1.3.0 is incompatible with FalkorDB 6.0.x.** The SDK creates full-text indexes with `CALL db.idx.fulltext.createNodeIndex('Chunk', 'text')`. The 6.0 Rust engine rejects this with *"Received 2 arguments … expected at most 1"*, and the SDK's circuit breaker then opens. SDK 1.4.0 contains the same call. ChainSleuth was developed on 6.0.2 at first, and the whole suite was then re-run on the 4.x C engine. **FalkorDB is pinned to v4.22.0**, where the suite passes.
 2. **Relationship uniqueness within a pattern is not enforced** (on both v4.22.0 and 6.0.2). One `USES_ACCOUNT` edge can bind twice, so a supplier matches itself. Every two-sided query therefore excludes self-matches explicitly (`s1.supplier_id < s2.supplier_id` or `o <> s`).
 3. **On 6.0.2, `MATCH … WHERE` followed by `OPTIONAL MATCH … WHERE` dropped the first `WHERE`.** The duplicate query returned 63,368 rows instead of 2. v4.22.0 applies the filter correctly, but the queries keep a `WITH` barrier there so they behave the same on both versions.
 
@@ -360,7 +365,7 @@ Two SDK details also differed from what the current documentation suggested. The
 - The rules are deliberately simple and exact. There is no near-duplicate invoice matching, no unit-conversion table, and no fuzzy entity resolution across supplier names.
 - The grounding validator checks IDs, digits and wording. It does not check numbers written as words or the semantic correctness of a sentence, so reviewers should still read the evidence panel.
 - The synthetic dataset is small (80 suppliers, 178 invoices, 194 shipments). Latency at production scale has not been measured.
-- The API has no authentication. It is meant for local use; do not expose FalkorDB or the API publicly without adding authentication.
+- API authentication is a static bearer-token list for local use (read-only routes are open). Do not expose FalkorDB or the API publicly; use TLS and a real identity provider for any shared deployment.
 
 ## Repository layout
 
@@ -379,7 +384,7 @@ backend/
   data/generated/*.csv           generated dataset
   data/ground_truth.csv          evaluation labels (never loaded into the graph)
   data/policies/*.md             synthetic policy documents
-  tests/                         73 tests
+  tests/                         85 tests
 frontend/                        Next.js 15 + MUI 6 investigation UI
 docs/screenshots/                README product screenshots
 AI_USAGE.md                      disclosure of AI coding assistance
