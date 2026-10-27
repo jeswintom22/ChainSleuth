@@ -74,10 +74,20 @@ export type GraphData = {
   edges: { source: string; target: string; type: string }[];
 };
 
+const TOKEN_KEY = "chainsleuth.token";
+export const getToken = () => (typeof window === "undefined" ? null : localStorage.getItem(TOKEN_KEY));
+export const setToken = (token: string) => localStorage.setItem(TOKEN_KEY, token);
+export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = getToken();
   const res = await fetch(`/api${path}`, {
     ...init,
-    headers: { "content-type": "application/json", ...(init?.headers || {}) },
+    headers: {
+      "content-type": "application/json",
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
+      ...(init?.headers || {}),
+    },
     cache: "no-store",
   });
   if (!res.ok) {
@@ -93,6 +103,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => request<Record<string, unknown>>("/health"),
+  me: () => request<{ name: string; role: string }>("/auth/me"),
   stats: () => request<Record<string, any>>("/stats"),
   rules: () => request<any[]>("/rules"),
   loadDataset: (reset: boolean) => request<any>("/admin/load-dataset", { method: "POST", body: JSON.stringify({ reset }) }),
@@ -102,14 +113,14 @@ export const api = {
     return request<Finding[]>(`/findings?${params}`);
   },
   finding: (id: string) => request<Finding>(`/findings/${id}`),
-  review: (id: string, body: { decision: string; reviewer: string; note: string; investigation_id?: string }) =>
+  review: (id: string, body: { decision: string; note: string; investigation_id?: string }) =>
     request<any>(`/findings/${id}/review`, { method: "POST", body: JSON.stringify(body) }),
   investigations: () => request<InvestigationSummary[]>("/investigations"),
   investigation: (id: string) => request<Investigation>(`/investigations/${id}`),
-  createInvestigation: (body: { question: string; entity_id?: string; created_by: string; use_llm?: boolean }) =>
+  createInvestigation: (body: { question: string; entity_id?: string; use_llm?: boolean }) =>
     request<Investigation>("/investigations", { method: "POST", body: JSON.stringify(body) }),
-  setStatus: (id: string, status: string, reviewer: string) =>
-    request<Investigation>(`/investigations/${id}`, { method: "PATCH", body: JSON.stringify({ status, reviewer }) }),
+  setStatus: (id: string, status: string) =>
+    request<Investigation>(`/investigations/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }),
   graph: (id: string) => request<GraphData>(`/investigations/${id}/graph`),
   turns: (id: string) => request<Turn[]>(`/investigations/${id}/turns`),
   ask: (id: string, question: string) => request<Turn>(`/investigations/${id}/ask`, { method: "POST", body: JSON.stringify({ question }) }),

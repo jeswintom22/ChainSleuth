@@ -1,15 +1,32 @@
 "use client";
-import { AppBar, Box, Button, Container, CssBaseline, TextField, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, Chip, Container, CssBaseline, TextField, Toolbar, Tooltip, Typography } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import Link from "next/link";
+import { useState } from "react";
 import theme from "@/theme";
 import { ReviewerProvider, useReviewer } from "@/lib/reviewer";
 
 function ReviewerField() {
-  const [reviewer, setReviewer] = useReviewer();
+  const { user, error, signIn, signOut } = useReviewer();
+  const [token, setTokenInput] = useState("");
+  if (user) {
+    return (
+      <>
+        <Chip label={`${user.name} (${user.role})`} />
+        <Button size="small" onClick={signOut}>Sign out</Button>
+      </>
+    );
+  }
   return (
-    <TextField size="small" label="Reviewer" value={reviewer} onChange={(e) => setReviewer(e.target.value)} sx={{ width: 180 }} />
+    <Box component="form" sx={{ display: "flex", gap: 1 }}
+      onSubmit={(e) => { e.preventDefault(); signIn(token).finally(() => setTokenInput("")); }}>
+      <Tooltip title={error || "Token from CHAINSLEUTH_API_USERS in backend/.env"}>
+        <TextField size="small" type="password" label="API token" value={token} error={!!error}
+          onChange={(e) => setTokenInput(e.target.value)} sx={{ width: 200 }} />
+      </Tooltip>
+      <Button size="small" type="submit" disabled={!token.trim()}>Sign in</Button>
+    </Box>
   );
 }
 

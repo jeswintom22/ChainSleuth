@@ -29,6 +29,7 @@ class Settings:
     data_dir: Path = BACKEND_DIR / "data" / "generated"
     policies_dir: Path = BACKEND_DIR / "data" / "policies"
     dataset_version: str = os.getenv("DATASET_VERSION", "synthetic-v1")
+    api_users: str = os.getenv("CHAINSLEUTH_API_USERS", "")
 
 
 settings = Settings()

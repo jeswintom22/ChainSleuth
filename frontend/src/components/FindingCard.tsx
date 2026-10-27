@@ -24,7 +24,7 @@ function fmt(v: unknown): string {
 export default function FindingCard({ finding, investigationId, onChange, defaultExpanded }: {
   finding: Finding; investigationId?: string; onChange?: () => void; defaultExpanded?: boolean;
 }) {
-  const [reviewer] = useReviewer();
+  const { user } = useReviewer();
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export default function FindingCard({ finding, investigationId, onChange, defaul
   const decide = async (decision: string) => {
     setBusy(true); setError(null);
     try {
-      await api.review(finding.finding_id, { decision, reviewer, note, investigation_id: investigationId });
+      await api.review(finding.finding_id, { decision, note, investigation_id: investigationId });
       setNote("");
       onChange?.();
     } catch (e) { setError(String(e)); } finally { setBusy(false); }
@@ -101,7 +101,7 @@ export default function FindingCard({ finding, investigationId, onChange, defaul
             {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
             <Stack direction={{ xs: "column", md: "row" }} spacing={1} alignItems="center">
               <TextField size="small" label="Note / justification" value={note} onChange={(e) => setNote(e.target.value)} sx={{ flex: 1 }} />
-              <ButtonGroup disabled={busy || !reviewer}>
+              <ButtonGroup disabled={busy || !user}>
                 <Button onClick={() => decide("needs_review")}>Needs review</Button>
                 <Button color="error" onClick={() => decide("confirmed")}>Confirm signal</Button>
                 <Button color="success" onClick={() => decide("dismissed")}>Dismiss</Button>

@@ -1,14 +1,17 @@
-"""ChainSleuth API. No endpoint accepts Cypher; every graph operation goes through named functions."""
+"""ChainSleuth API. No endpoint accepts Cypher; every graph operation goes through named functions.
+
+Every state-changing route requires a bearer token (see app/auth.py); reviewer identity comes from that token."""
 from __future__ import annotations
 
 import logging
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from app.agent import orchestrator
 from app.agent.llm import llm_available
+from app.auth import User, current_user, require_admin
 from app.config import settings
 from app.detection.base import RULES
 from app.graph import client
@@ -35,20 +38,17 @@ class LoadRequest(BaseModel):
 class InvestigationRequest(BaseModel):
     question: str = Field(min_length=3, max_length=500)
     entity_id: str | None = Field(default=None, pattern=ID_PATTERN)
-    created_by: str = Field(default="auditor", max_length=80)
     use_llm: bool | None = None
 
 
 class ReviewRequest(BaseModel):
     decision: str = Field(pattern=r"^(open|needs_review|confirmed|dismissed)$")
-    reviewer: str = Field(min_length=1, max_length=80)
     note: str = Field(default="", max_length=1000)
     investigation_id: str | None = None
 
 
 class StatusRequest(BaseModel):
     status: str = Field(pattern=r"^(open|in_review|closed)$")
-    reviewer: str = Field(min_length=1, max_length=80)
 
 
 class AskRequest(BaseModel):
@@ -83,8 +83,13 @@ def health():
             "graphrag_detail": None if graphrag_client.is_available() else graphrag_client.unavailable_reason()}
 
 
+@app.get("/api/auth/me")
+def me(user: User = Depends(current_user)):
+    return {"name": user.name, "role": user.role}
+
+
 @app.post("/api/admin/load-dataset")
-def load(req: LoadRequest):
+def load(req: LoadRequest, _: User = Depends(require_admin)):
     if req.reset:
         reset_operational_graph()
     counts = load_dataset()
@@ -103,7 +108,7 @@ def rules():
 
 
 @app.post("/api/detect/run")
-def detect():
+def detect(_: User = Depends(current_user)):
     return service.run_detection()
 
 
@@ -128,9 +133,9 @@ def finding(finding_id: str):
 
 
 @app.post("/api/findings/{finding_id}/review")
-def review(finding_id: str, req: ReviewRequest):
+def review(finding_id: str, req: ReviewRequest, user: User = Depends(current_user)):
     try:
-        return repo.record_review(finding_id, req.decision, req.reviewer, req.note, req.investigation_id)
+        return repo.record_review(finding_id, req.decision, user.name, req.note, req.investigation_id)
     except KeyError:
         _404("Finding")
 
@@ -141,9 +146,9 @@ def investigations():
 
 
 @app.post("/api/investigations")
-def create_investigation(req: InvestigationRequest):
+def create_investigation(req: InvestigationRequest, user: User = Depends(current_user)):
     try:
-        return orchestrator.investigate(req.question, req.entity_id, req.created_by, req.use_llm)
+        return orchestrator.investigate(req.question, req.entity_id, user.name, req.use_llm)
     except (ValueError, LookupError) as e:
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -154,9 +159,9 @@ def get_investigation(inv_id: str):
 
 
 @app.patch("/api/investigations/{inv_id}")
-def update_investigation(inv_id: str, req: StatusRequest):
+def update_investigation(inv_id: str, req: StatusRequest, user: User = Depends(current_user)):
     try:
-        return service.set_status(inv_id, req.status, req.reviewer)
+        return service.set_status(inv_id, req.status, user.name)
     except KeyError:
         _404("Investigation")
 
@@ -172,7 +177,7 @@ def turns(inv_id: str):
 
 
 @app.post("/api/investigations/{inv_id}/ask")
-def ask(inv_id: str, req: AskRequest):
+def ask(inv_id: str, req: AskRequest, _: User = Depends(current_user)):
     try:
         return orchestrator.ask(inv_id, req.question, req.use_llm)
     except KeyError:

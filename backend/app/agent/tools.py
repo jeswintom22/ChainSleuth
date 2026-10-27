@@ -79,8 +79,8 @@ def search_policy(question: str) -> dict:
     return retrieve_policy(question[:300], k=3)
 
 
-def open_investigation(entity_id: str, question: str) -> dict:
-    inv = service.open_investigation(question[:500], entity_id=entity_id)
+def open_investigation(entity_id: str, question: str, created_by: str = "auditor") -> dict:
+    inv = service.open_investigation(question[:500], entity_id=entity_id, created_by=created_by)
     return {"investigation_id": inv["investigation_id"], "score": inv["score"], "severity": inv["severity"],
             "findings": [{"finding_id": f["finding_id"], "rule_id": f["rule_id"], "summary": f["evidence_summary"]}
                          for f in inv["findings"]]}
@@ -128,7 +128,7 @@ TOOLS: dict[str, tuple[Callable[..., Any], dict, bool]] = {
 
 
 # Orchestrator-supplied context (never settable by the model), e.g. the investigation opened in this session.
-CONTEXT_PARAMS = {"compare_with_previous": ("current_investigation",)}
+CONTEXT_PARAMS = {"compare_with_previous": ("current_investigation",), "open_investigation": ("created_by",)}
 
 
 def call_tool(name: str, args: dict, allow_writes: bool = True, context: dict | None = None) -> Any:
